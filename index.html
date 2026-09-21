@@ -248,32 +248,30 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
-      color: #ffffff;
-      border: none;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      color: #1d4ed8;
+      font-size: 0.8rem;
+      font-weight: 700;
       padding: 6px 12px;
       border-radius: var(--radius-md);
-      font-size: 0.78rem;
-      font-weight: 700;
       cursor: pointer;
-      box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
-      transition: all 0.2s ease;
+      transition: all 0.15s;
     }
     .btn-report-nav:hover {
+      background: #dbeafe;
       transform: translateY(-1px);
-      box-shadow: 0 4px 8px rgba(37, 99, 235, 0.3);
     }
 
     .theme-select {
       background: var(--bg-subtle);
-      border: 1px solid var(--border-color);
       color: var(--text-main);
+      border: 1px solid var(--border-color);
       padding: 5px 8px;
       border-radius: var(--radius-md);
-      font-size: 0.75rem;
-      font-weight: 600;
-      outline: none;
+      font-size: 0.8rem;
       cursor: pointer;
+      outline: none;
     }
 
     /* ==========================================================================
@@ -460,7 +458,7 @@
       border: 1.5px solid var(--primary);
       border-radius: var(--radius-md);
       box-shadow: 0 10px 25px rgba(0, 0, 0, 0.18);
-      max-height: 220px;
+      max-height: 240px;
       overflow-y: auto;
       z-index: 999999 !important;
       padding: 4px;
@@ -601,81 +599,54 @@
        ========================================================================== */
     .table-toolbar {
       display: flex;
+      flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
       gap: 10px;
-      flex-wrap: wrap;
-      margin-bottom: 12px;
       background: var(--bg-subtle);
       padding: 10px 12px;
       border-radius: var(--radius-md);
       border: 1px solid var(--border-color);
+      margin-bottom: 12px;
     }
 
-    .filters-cluster {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .filter-item {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
+    .filter-group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .filter-item { display: flex; align-items: center; gap: 4px; }
+    .filter-label { font-size: 0.74rem; font-weight: 700; color: var(--text-muted); }
     .filter-select {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
       padding: 5px 8px;
       font-size: 0.78rem;
-      font-weight: 600;
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
       border-radius: var(--radius-sm);
+      color: var(--text-main);
       outline: none;
-      cursor: pointer;
     }
 
-    .search-wrapper {
-      position: relative;
-      flex: 1;
-      min-width: 180px;
-      max-width: 260px;
-    }
-    .search-icon {
-      position: absolute;
-      left: 9px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--text-light);
-      pointer-events: none;
-    }
-    .search-input {
-      padding-left: 28px !important;
-      font-size: 0.78rem !important;
-      padding-top: 5px !important;
-      padding-bottom: 5px !important;
-    }
+    .search-wrapper { position: relative; flex: 1; min-width: 180px; max-width: 280px; }
+    .search-icon { position: absolute; left: 8px; top: 50%; transform: translateY(-50%); color: var(--text-light); pointer-events: none; display: flex; }
+    .search-input { padding-left: 28px !important; font-size: 0.78rem; padding-top: 5px; padding-bottom: 5px; }
 
-    .export-dropdown { position: relative; }
+    /* Menú Desplegable de Exportación */
+    .export-dropdown { position: relative; display: inline-block; }
     .export-menu {
       position: absolute;
-      top: calc(100% + 4px);
       right: 0;
+      top: calc(100% + 4px);
       background: var(--bg-card);
       border: 1px solid var(--border-color);
       border-radius: var(--radius-md);
       box-shadow: var(--shadow-lg);
+      min-width: 200px;
+      z-index: 50;
+      padding: 4px;
       list-style: none;
-      min-width: 210px;
-      z-index: 100;
       display: none;
-      padding: 6px;
     }
     .export-menu.show { display: block; }
     .export-item {
       padding: 8px 12px;
-      font-size: 0.78rem;
+      font-size: 0.8rem;
       font-weight: 600;
       color: var(--text-main);
       border-radius: var(--radius-sm);
@@ -688,78 +659,93 @@
     .export-item:hover { background: var(--primary-light); color: var(--primary); }
 
     /* ==========================================================================
-       09. TABLA DE TICKETS (COMPACTA Y SIN SCROLL HORIZONTAL)
+       09. TABLA DE TICKETS COMPACTA (SIN SCROLL HORIZONTAL)
        ========================================================================== */
     .table-container {
-      width: 100%;
-      overflow-x: hidden;
       border: 1px solid var(--border-color);
       border-radius: var(--radius-md);
       background: var(--bg-card);
+      max-height: calc(100vh - 300px);
+      overflow-y: auto;
+      scrollbar-width: thin;
     }
 
     .data-table {
       width: 100%;
-      table-layout: fixed;
       border-collapse: collapse;
       font-size: 0.8rem;
+      text-align: left;
+      table-layout: auto;
+    }
+
+    .data-table thead {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: var(--bg-subtle);
     }
 
     .data-table th {
-      background: var(--bg-subtle);
-      color: var(--text-muted);
-      font-weight: 700;
-      font-size: 0.72rem;
+      padding: 10px 8px;
+      font-size: 0.7rem;
+      font-weight: 800;
       text-transform: uppercase;
-      letter-spacing: 0.03em;
-      padding: 8px 10px;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
       border-bottom: 1px solid var(--border-color);
-      text-align: left;
+      white-space: nowrap;
+    }
+
+    .data-table tbody tr {
+      border-bottom: 1px solid var(--border-color);
+      transition: background 0.12s ease;
+    }
+    .data-table tbody tr:hover {
+      background: color-mix(in srgb, var(--primary) 4%, var(--bg-card));
     }
 
     .data-table td {
-      padding: 8px 10px;
-      border-bottom: 1px solid var(--border-subtle);
+      padding: 8px 8px;
       vertical-align: middle;
       color: var(--text-main);
-    }
-
-    .data-table tbody tr:hover {
-      background-color: var(--primary-light);
+      line-height: 1.25;
     }
 
     .ticket-id {
       font-family: monospace;
       font-weight: 700;
+      font-size: 0.74rem;
       color: var(--primary);
-      font-size: 0.78rem;
+      background: var(--primary-light);
+      padding: 2px 4px;
+      border-radius: 4px;
+      display: inline-block;
       cursor: pointer;
     }
-    .ticket-id:hover { text-decoration: underline; }
 
     .service-cell {
       display: flex;
       flex-direction: column;
       gap: 2px;
-      min-width: 0;
+      max-width: 220px;
     }
     .service-name {
-      font-weight: 700;
+      font-weight: 600;
+      font-size: 0.78rem;
       color: var(--text-main);
-      font-size: 0.8rem;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+      white-space: normal;
     }
     .category-tag {
       font-size: 0.68rem;
       color: var(--text-muted);
-      font-weight: 600;
+      background: var(--bg-subtle);
+      padding: 1px 5px;
+      border-radius: 4px;
+      align-self: flex-start;
+      border: 1px solid var(--border-color);
     }
 
     .user-cell {
-      overflow: hidden;
-      text-overflow: ellipsis;
       font-weight: 600;
       font-size: 0.78rem;
       max-width: 140px;
@@ -912,172 +898,84 @@
     }
 
     /* ==========================================================================
-       11. INFORME MENSUAL Y GRÁFICAS EJECUTIVAS
+       11. PANTALLA DE AUTENTICACIÓN / ACCESO SEGURO
        ========================================================================== */
-    .report-filter-bar {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin-bottom: 14px;
-      padding-bottom: 12px;
-      border-bottom: 1px solid var(--border-color);
-    }
-
-    .report-summary-box {
-      background: linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%);
-      border: 1px solid #bfdbfe;
-      border-radius: var(--radius-md);
-      padding: 14px;
-      margin-bottom: 16px;
-      font-size: 0.86rem;
-      line-height: 1.5;
-      color: #1e3a8a;
-    }
-    body[data-theme="dark"] .report-summary-box {
-      background: #172554;
-      border-color: #1e40af;
-      color: #dbeafe;
-    }
-
-    .report-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-      margin-bottom: 16px;
-    }
-
-    @media (max-width: 680px) {
-      .report-grid { grid-template-columns: 1fr; }
-    }
-
-    .chart-card {
-      background: var(--bg-subtle);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-md);
-      padding: 12px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    .chart-card h4 {
-      font-size: 0.78rem;
-      font-weight: 700;
-      color: var(--text-muted);
-      margin-bottom: 10px;
-      text-transform: uppercase;
-    }
-    .chart-container {
-      width: 100%;
-      height: 220px;
-      position: relative;
-    }
-
-    .report-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.8rem;
-    }
-    .report-table th, .report-table td {
-      padding: 7px 10px;
-      border-bottom: 1px solid var(--border-color);
-    }
-    .report-table th { background: var(--bg-subtle); font-size: 0.72rem; }
-
-    /* ==========================================================================
-       12. MODAL DE AUTENTICACIÓN / LOGIN
-       ========================================================================== */
-    .auth-overlay {
+    #authOverlay {
       position: fixed;
       inset: 0;
-      background: rgba(15, 23, 42, 0.8);
-      backdrop-filter: blur(8px);
-      z-index: 999999;
-      display: none;
+      z-index: 99999;
+      background: var(--bg-body);
+      display: flex;
       align-items: center;
       justify-content: center;
-      padding: 16px;
+      padding: 20px;
     }
-
     .auth-card {
       background: var(--bg-card);
       border: 1px solid var(--border-color);
       border-radius: var(--radius-lg);
-      padding: 24px;
-      width: min(400px, 94vw);
       box-shadow: var(--shadow-xl);
-      text-align: center;
+      width: min(440px, 94vw);
+      padding: 30px;
       display: flex;
       flex-direction: column;
-      gap: 14px;
-      animation: modal-in 0.25s ease-out;
+      align-items: center;
+      text-align: center;
+      gap: 16px;
     }
 
-    .auth-avatar-big {
-      width: 56px;
-      height: 56px;
-      border-radius: 50%;
-      background: var(--primary-light);
-      color: var(--primary);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto;
-      font-size: 1.5rem;
+    /* ==========================================================================
+       12. INFORME MENSUAL
+       ========================================================================== */
+    .report-filter-bar {
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+      background: var(--bg-subtle); padding: 10px 14px; border-radius: var(--radius-md);
+      border: 1px solid var(--border-color); margin-bottom: 14px;
     }
+    .report-summary-box {
+      background: var(--bg-subtle); border: 1px solid var(--border-color);
+      border-left: 4px solid var(--primary); border-radius: var(--radius-md);
+      padding: 12px 16px; font-size: 0.88rem; line-height: 1.55; margin-bottom: 16px;
+    }
+    .report-grid { display: grid; grid-template-columns: 1fr; gap: 16px; margin-bottom: 16px; }
+    @media(min-width: 768px) { .report-grid { grid-template-columns: 1fr 1fr; } }
+    .chart-card {
+      background: var(--bg-card); border: 1px solid var(--border-color);
+      border-radius: var(--radius-md); padding: 14px; display: flex; flex-direction: column; align-items: center;
+    }
+    .chart-card h4 { font-size: 0.82rem; font-weight: 700; margin-bottom: 10px; }
+    .chart-container { position: relative; width: 100%; max-height: 250px; display: flex; justify-content: center; }
+
+    .report-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+    .report-table th { background: var(--bg-subtle); padding: 8px 10px; text-align: left; border: 1px solid var(--border-color); color: var(--text-muted); }
+    .report-table td { padding: 6px 10px; border: 1px solid var(--border-color); }
+    .report-table tr:nth-child(even) { background: var(--bg-subtle); }
 
     /* Toasts */
-    .toast-container {
-      position: fixed;
-      bottom: 16px;
-      right: 16px;
-      z-index: 9999999;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
+    .toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; max-width: 360px; }
     .toast {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      padding: 10px 14px;
-      border-radius: var(--radius-md);
-      box-shadow: var(--shadow-lg);
-      font-size: 0.82rem;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      min-width: 240px;
-      animation: toast-in 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md);
+      padding: 10px 14px; box-shadow: var(--shadow-lg); display: flex; align-items: center; gap: 10px; font-size: 0.82rem; font-weight: 500;
     }
     .toast.success { border-left: 4px solid #10b981; }
     .toast.error { border-left: 4px solid #ef4444; }
-    .toast.info { border-left: 4px solid #3b82f6; }
+    .toast.info { border-left: 4px solid var(--primary); }
 
-    @keyframes toast-in {
-      from { transform: translateX(100%); opacity: 0; }
-      to { transform: translateX(0); opacity: 1; }
-    }
-
-    footer {
-      margin-top: 24px;
-      text-align: center;
-      font-size: 0.74rem;
-      color: var(--text-light);
-    }
+    footer { margin-top: 24px; text-align: center; font-size: 0.78rem; color: var(--text-muted); }
   </style>
 </head>
 <body data-theme="light">
 
+  <!-- ==================== CONTENEDOR TOASTS ==================== -->
   <div id="toastContainer" class="toast-container"></div>
 
-  <!-- ==================== OVERLAY LOGIN / ACCESO RESTRINGIDO ==================== -->
-  <div id="authOverlay" class="auth-overlay">
+  <!-- ==================== PANTALLA DE BLOQUEO / AUTENTICACIÓN ==================== -->
+  <div id="authOverlay">
     <div class="auth-card">
-      <div class="auth-avatar-big">🔐</div>
+      <img src="Imagen/logo-empresas.jpg" alt="Logo" style="height:48px;" onerror="this.onerror=null;this.src='https://jose01ve.github.io/GESTION-TI/Imagen/logo-empresas.jpg';">
       <div>
-        <h2 style="font-size:1.15rem; font-weight:800; color:var(--text-main);">Acceso Mesa de Ayuda TI</h2>
-        <p style="font-size:0.78rem; color:var(--text-muted); margin-top:3px;">Autenticación para analistas autorizados</p>
+        <h2 style="font-size:1.2rem; font-weight:800; color:var(--text-main);">Gestión TI Interventoría Ituango</h2>
+        <p style="font-size:0.82rem; color:var(--text-muted); margin-top:4px;">Acceso restringido a analistas autorizados</p>
       </div>
 
       <div style="width:100%; text-align:left;">
@@ -1243,9 +1141,9 @@
               <!-- Usuario Reporta (Búsqueda en Base de Datos de Personal - Columna B) -->
               <div class="form-group ac-wrapper">
                 <label for="usuario">Usuario que reporta <span class="required-star">*</span></label>
-                <input id="usuario" class="form-control" placeholder="Escribe nombre o apellido…" required autocomplete="off" />
+                <input id="usuario" name="usuario_ituango_search" class="form-control" placeholder="Escribe nombre, apellido o cédula…" required autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
                 <ul id="acList" class="ac-dropdown" hidden></ul>
-                <span class="input-hint">Elige entre las sugerencias</span>
+                <span id="userSelectedEmail" class="input-hint">Elige entre las sugerencias</span>
               </div>
 
               <!-- Prioridad -->
@@ -1357,27 +1255,27 @@
               <span class="kpi-title">Cancelados</span>
               <div class="kpi-value" id="kpiCa" style="color:var(--status-cancelled);">0</div>
             </div>
-            <div class="kpi-card" data-kpi="req" title="Filtrar con Requerimiento">
-              <span class="kpi-title">Con REQ</span>
+            <div class="kpi-card" data-kpi="req" title="Filtrar Con Requerimiento">
+              <span class="kpi-title">Con Requerimiento</span>
               <div class="kpi-value" id="kpiRq" style="color:#8b5cf6;">0</div>
             </div>
           </div>
 
-          <!-- Barra de Filtros y Búsqueda -->
+          <!-- Toolbar / Filtros -->
           <div class="table-toolbar">
-            <div class="filters-cluster">
+            <div class="filter-group">
               <div class="filter-item">
                 <span class="filter-label">Vista:</span>
                 <select id="viewSelect" class="filter-select">
-                  <option value="todos">Todos los reportes</option>
-                  <option value="mis">Mis reportes</option>
+                  <option value="mis">Asignados a mí</option>
+                  <option value="todos">Todos los analistas</option>
                 </select>
               </div>
 
               <div class="filter-item">
                 <span class="filter-label">Analista:</span>
                 <select id="analystSelect" class="filter-select">
-                  <option value="">Todos los analistas</option>
+                  <option value="">Todos</option>
                   <option>Jose Salas</option>
                   <option>Sebastián Cataño</option>
                   <option>Sebastián Posada</option>
@@ -1389,7 +1287,7 @@
                 <span class="filter-label">Estado:</span>
                 <select id="statusSelect" class="filter-select">
                   <option value="">Todos los estados</option>
-                  <option value="pendientes">Pendientes (Abiertos + En Proceso)</option>
+                  <option value="pendientes">Pendientes</option>
                   <option value="Abierto">Abierto</option>
                   <option value="En Proceso">En Proceso</option>
                   <option value="Cerrado">Cerrado</option>
@@ -1562,7 +1460,8 @@
     'use strict';
 
     /* ==================== CONFIGURACIÓN & ANALISTAS AUTORIZADOS ==================== */
-    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxRBLOj6dLqDn6OK13uF-KM39ZuRvRQZMs-qJRSAsrijQLo95LlTnu54Z7-WoILW8CU4w/exec';
+    const DEFAULT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyleEgTmN1rMnNW2-1eBOYC48ed9Fa3G9ZuhvIzQQHoeEbL9iOLW_dkoP2TeEsz3YdYeA/exec';
+    let WEB_APP_URL = localStorage.getItem('gas_web_app_url') || DEFAULT_WEB_APP_URL;
     const DIRECTORY_SPREADSHEET_ID = '1JCORZBlWL0DPs9DuZQsvd1VFuMy1ZVBT8RgM1S_eNZ0';
     const AUTO_REFRESH_MS = 30000;
     const PAGE_SIZE = 25;
@@ -1575,43 +1474,82 @@
       { nombre:'Pablo Calle',       email:'pablocalle@ingetec.com.co', init:'PC', pin:'1234' }
     ];
 
-    // Directorio de Personal Interventoría Ituango (Columna B de la hoja ACTIVOS - ID: 1JCORZBlWL0DPs9DuZQsvd1VFuMy1ZVBT8RgM1S_eNZ0)
-    let USUARIOS = [
-      'Guerrero Carvajal Diego Fernando',
-      'Fragozo Ibarra Kleyver Andres',
-      'Hoyos Villalba Jose David',
-      'Paniagua Otalvaro Leonardo Francisco',
-      'Arbelaez Fernandez Cristian Camilo',
-      'Acosta Rojas Susan Daniela',
-      'Cossio Sepulveda Juan Diego',
-      'Valencia Guerra Ricardo Wilson',
-      'Hidalgo Mendez Henry de Jesús',
-      'Montoya Gonzalez Yeferson Davison',
-      'Padilla Caballero Yormi Alexander',
-      'Blandon Puerta Cristian Camilo',
-      'Naranjo Jaramillo Nelson Enrique',
-      'Buelvas Arango Julio Cesar',
-      'Guerrero Oropeza Nestor Eduardo',
-      'Espinosa Cardenal Andres Mauricio',
-      'Durango Muñoz Carlos Emerson',
-      'Peña Guerrero Luis Alberto',
-      'Vargas Méndez Daniel Eduardo',
-      'Franco Franco Carlos Alberto',
-      'Sanchez Giraldo Alexander',
-      'Arango Betancur Yesid Orlando',
-      'Carlos Andres Vargas',
-      'Maria Camila Gomez',
-      'Maria Victoria Lopez',
-      'Maria Elena Restrepo',
-      'Maria Jose Perez',
-      'Marcela Pareja',
-      'Jhon Madrid',
-      'Juan Carlos Betancur',
-      'Jose Salas',
-      'Sebastián Cataño',
-      'Sebastián Posada',
-      'Pablo Calle'
+    // Directorio de Personal Interventoría Ituango (Base inicial + caché + sincronización en tiempo real)
+    const contactsCacheKey = 'contacts_ituango_cache_v3';
+    const loadCachedContacts = () => {
+      try { return JSON.parse(localStorage.getItem(contactsCacheKey)) || null; } catch { return null; }
+    };
+    const saveCachedContacts = list => {
+      try { localStorage.setItem(contactsCacheKey, JSON.stringify(list)); } catch(e){}
+    };
+
+    const DEFAULT_CONTACTS = [
+      { name:'Fragozo Ibarra Kleyver Andres', role:'Auxiliar de Ingenieria', email:'kfragozo@sedic.com.co', id:'1.192.896.704', empresa:'Sedic' },
+      { name:'Hoyos Villalba Jose David', role:'Conductor', email:'jhoyos@sedic.com.co', id:'5.681.213', empresa:'Ingetec' },
+      { name:'Paniagua Otalvaro Leonardo Francisco', role:'Conductor', email:'lpaniagua@sedic.com.co', id:'71.218.659', empresa:'Ingetec' },
+      { name:'Arbelaez Fernandez Cristian Camilo', role:'Ingeniero Auxiliar', email:'carbelaez@sedic.com.co', id:'1.152.192.570', empresa:'Ingetec' },
+      { name:'Acosta Rojas Susan Daniela', role:'Ingeniero Auxiliar', email:'sacosta@sedic.com.co', id:'1.006.795.212', empresa:'Ingetec' },
+      { name:'Cossio Sepulveda Juan Diego', role:'Conductor', email:'jcossio@sedic.com.co', id:'1.007.397.404', empresa:'Ingetec' },
+      { name:'Valencia Guerra Ricardo Wilson', role:'Conductor', email:'rvalencia@sedic.com.co', id:'15.264.170', empresa:'Ingetec' },
+      { name:'Hidalgo Mendez Henry de Jesús', role:'Conductor', email:'hhidalgo@sedic.com.co', id:'1.020.423.463', empresa:'Ingetec' },
+      { name:'Montoya Gonzalez Yeferson Davison', role:'Auxiliar de Ingenieria', email:'ymontoya@sedic.com.co', id:'1.001.250.181', empresa:'Sedic' },
+      { name:'Padilla Caballero Yormi Alexander', role:'Conductor', email:'ypadilla@sedic.com.co', id:'80.886.821', empresa:'Ingetec' },
+      { name:'Blandon Puerta Cristian Camilo', role:'Conductor', email:'cblandon@sedic.com.co', id:'1.032.096.336', empresa:'Ingetec' },
+      { name:'Naranjo Jaramillo Nelson Enrique', role:'Conductor', email:'nnaranjo@sedic.com.co', id:'1.020.396.909', empresa:'Ingetec' },
+      { name:'Buelvas Arango Julio Cesar', role:'Conductor', email:'jbuelvas@sedic.com.co', id:'1.000.405.363', empresa:'Ingetec' },
+      { name:'Guerrero Oropeza Nestor Eduardo', role:'Conductor', email:'nguerrero@sedic.com.co', id:'6.458.202', empresa:'Ingetec' },
+      { name:'Espinosa Cardenal Andres Mauricio', role:'Ingeniero Auxiliar', email:'aespinosa@sedic.com.co', id:'7.180.600', empresa:'Ingetec' },
+      { name:'Durango Muñoz Carlos Emerson', role:'Conductor', email:'cdurango@sedic.com.co', id:'80.035.218', empresa:'Sedic' },
+      { name:'Peña Guerrrero Luis Alberto', role:'Topografo', email:'lpena@sedic.com.co', id:'1.098.630.328', empresa:'Ingetec' },
+      { name:'Vargas Méndez Daniel Eduardo', role:'Inspector SST', email:'dvargas@sedic.com.co', id:'1.072.750.084', empresa:'Sedic' },
+      { name:'Franco Franco Carlos Alberto', role:'Cadenero II', email:'cfranco@sedic.com.co', id:'1.035.861.819', empresa:'Ingetec' },
+      { name:'Sanchez Giraldo Alexander', role:'Cadenero II', email:'asanchez@sedic.com.co', id:'1.128.393.652', empresa:'Ingetec' },
+      { name:'Arango Betancur Yesid Orlando', role:'Cadenero II', email:'yarango@sedic.com.co', id:'1.042.771.630', empresa:'Ingetec' },
+      { name:'Quiñonez Gelis Luis Fernando', role:'Topografo', email:'lquinonez@sedic.com.co', id:'1.063.276.000', empresa:'Ingetec' },
+      { name:'Amezquita Avila Anyelo Yamid', role:'Jefe de Frente', email:'aamezquita@ingetec.com.co', id:'7.174.291', empresa:'Ingetec' },
+      { name:'Rodriguez Mangones Cristian Camilo', role:'Auxiliar Dibujante', email:'crodriguez@sedic.com.co', id:'1.233.498.181', empresa:'Ingetec' },
+      { name:'Uribe Mazo Luis Guillermo', role:'Cadenero II', email:'luribe@sedic.com.co', id:'15.296.616', empresa:'Ingetec' },
+      { name:'Rivera Mejia Sergio Antonio', role:'Cadenero I', email:'srivera@sedic.com.co', id:'71.218.608', empresa:'Ingetec' },
+      { name:'Godoy Ibañez Juan Esteban', role:'Topografo', email:'jgodoy@sedic.com.co', id:'1.097.399.466', empresa:'Ingetec' },
+      { name:'Navarro Barrera Cristian Felipe', role:'Cadenero II', email:'cnavarro@sedic.com.co', id:'1.044.121.835', empresa:'Sedic' },
+      { name:'Yarlin Palacios Cordoba', role:'Técnico de Campo', email:'ypalacios@sedic.com.co', id:'1.042.789.654', empresa:'Sedic' },
+      { name:'Yarlin Mosquera', role:'Auxiliar Operativo', email:'ymosquera@sedic.com.co', id:'1.037.456.123', empresa:'Sedic' },
+      { name:'Angel David Morales', role:'Ingeniero Civil', email:'amorales@sedic.com.co', id:'1.036.547.890', empresa:'Ingetec' },
+      { name:'Angel Gomez', role:'Técnico Campo', email:'agomez@sedic.com.co', id:'71.258.963', empresa:'Sedic' },
+      { name:'Guerrero Carvajal Diego Fernando', role:'Ingeniero TI', email:'dguerrero@sedic.com.co', id:'1.037.598.124', empresa:'Sedic' },
+      { name:'Carlos Andres Vargas', role:'Ingeniero TI', email:'cvargas@sedic.com.co', id:'1.024.567.890', empresa:'Ingetec' },
+      { name:'Salas Eldin Jose', role:'Personal de Campo', email:'esalas@sedic.com.co', id:'71.527.238', empresa:'Sedic' },
+      { name:'Jose Salas', role:'Analista TI', email:'jsalas@sedic.com.co', id:'1.037.123.456', empresa:'Sedic' },
+      { name:'Sebastián Cataño', role:'Analista TI', email:'scatano@sedic.com.co', id:'1.017.456.123', empresa:'Sedic' },
+      { name:'Sebastián Posada', role:'Analista TI', email:'sposada@sedic.com.co', id:'1.020.789.456', empresa:'Sedic' },
+      { name:'Pablo Calle', role:'Analista TI', email:'pablocalle@ingetec.com.co', id:'71.456.789', empresa:'Ingetec' }
     ];
+
+    let CONTACTS_LIST = loadCachedContacts() || DEFAULT_CONTACTS;
+
+    function updateContactsDirectory(freshList) {
+      if (!Array.isArray(freshList) || !freshList.length) return;
+      const map = new Map();
+      CONTACTS_LIST.forEach(c => map.set((c.name || '').toLowerCase().trim(), c));
+      freshList.forEach(item => {
+        if (typeof item === 'string') {
+          const key = item.toLowerCase().trim();
+          if (!map.has(key)) map.set(key, { name: item, role: '', email: '', id: '', empresa: '' });
+        } else if (item && item.name) {
+          const key = item.name.toLowerCase().trim();
+          map.set(key, {
+            name: item.name,
+            role: item.role || item.cargo || '',
+            email: item.email || item.correo || '',
+            id: item.id || item.doc || item.cedula || '',
+            phone: item.phone || '',
+            empresa: item.empresa || ''
+          });
+        }
+      });
+      CONTACTS_LIST = Array.from(map.values());
+      saveCachedContacts(CONTACTS_LIST);
+    }
 
     /* ==================== PARSER UNIVERSAL DE FECHAS ==================== */
     function parseTicketDate(val) {
@@ -1693,12 +1631,15 @@
 
     /* ==================== ESTADO ==================== */
     const localKey = 'tickets_fallas_v11';
+    const remoteCacheKey = 'tickets_fallas_remote_cache_v1';
     const loadLocal = () => { try { return JSON.parse(localStorage.getItem(localKey)) || []; } catch { return []; } };
     const saveLocal = v => localStorage.setItem(localKey, JSON.stringify(v));
+    const loadRemoteCache = () => { try { return JSON.parse(localStorage.getItem(remoteCacheKey)) || null; } catch { return null; } };
+    const saveRemoteCache = v => { try { localStorage.setItem(remoteCacheKey, JSON.stringify(v)); } catch(e){} };
     
     let ticketsLocal = loadLocal();
-    let ticketsRemote = null;
-    let lastSource = 'Local';
+    let ticketsRemote = loadRemoteCache();
+    let lastSource = ticketsRemote ? 'Google Sheets' : 'Local';
     let searchText = '';
     let currentPage = 1;
     let currentFilterKpi = null;
@@ -1799,7 +1740,7 @@
       }
     })();
 
-    /* ==================== AUTOCOMPLETE USUARIOS (COLUMNA B) ==================== */
+    /* ==================== AUTOCOMPLETE USUARIOS & CONTACTOS ==================== */
     const inputUsuario = $('#usuario'), acList = $('#acList');
     const norm = s => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
     
@@ -1808,27 +1749,51 @@
       if (!n || n.length < 1) return [];
       
       const terms = n.split(/\s+/).filter(Boolean);
-      return USUARIOS.filter(u => {
-        const nu = norm(u);
-        return terms.every(term => nu.includes(term));
-      }).slice(0, 20);
+      return CONTACTS_LIST.filter(c => {
+        const fullSearchString = norm(`${c.name || ''} ${c.email || ''} ${c.role || ''} ${c.id || ''}`);
+        return terms.every(term => fullSearchString.includes(term));
+      }).slice(0, 25);
     }
 
     function renderAcList(items){
       if (!acList) return;
       if (!items || !items.length) { 
-        acList.hidden = true;
+        acList.setAttribute('hidden', '');
         acList.style.display = 'none';
         acList.innerHTML = ''; 
         return; 
       }
-      acList.innerHTML = items.map((t, i) => `
-        <li class="ac-item" ${i === 0 ? 'aria-selected="true"' : ''} data-name="${esc(t)}">
-          👤 ${esc(t)}
+      acList.innerHTML = items.map((c, i) => `
+        <li class="ac-item" ${i === 0 ? 'aria-selected="true"' : ''} data-name="${esc(c.name)}" data-email="${esc(c.email || '')}" data-id="${esc(c.id || '')}">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2px;">
+            <strong style="font-size:0.83rem; color:var(--text-main);">👤 ${esc(c.name)}</strong>
+            ${c.role ? `<span style="font-size:0.7rem; background:var(--primary-light); color:var(--primary); padding:2px 6px; border-radius:4px; font-weight:700;">${esc(c.role)}</span>` : ''}
+          </div>
+          <div style="display:flex; gap:10px; font-size:0.72rem; color:var(--text-muted);">
+            ${c.email ? `<span>✉️ ${esc(c.email)}</span>` : ''}
+            ${c.id ? `<span>🆔 Doc: ${esc(c.id)}</span>` : ''}
+          </div>
         </li>
       `).join('');
-      acList.hidden = false;
+      acList.removeAttribute('hidden');
       acList.style.display = 'block';
+    }
+
+    function selectContact(name, email) {
+      if (inputUsuario) inputUsuario.value = name;
+      if (acList) {
+        acList.setAttribute('hidden', '');
+        acList.style.display = 'none';
+      }
+      const hint = $('#userSelectedEmail');
+      if (hint) {
+        if (email) {
+          hint.innerHTML = `<span style="color:var(--primary); font-weight:700;">✉️ Correo: ${esc(email)}</span>`;
+        } else {
+          hint.textContent = 'Usuario seleccionado';
+        }
+      }
+      showToast(`Usuario seleccionado: ${name}`, 'info');
     }
 
     if (inputUsuario) {
@@ -1860,22 +1825,18 @@
         } else if (e.key === 'Enter') {
           if (selectedIndex >= 0 && items[selectedIndex]) {
             e.preventDefault();
-            const val = items[selectedIndex].getAttribute('data-name') || items[selectedIndex].textContent.replace('👤', '').trim();
-            inputUsuario.value = val;
-            acList.hidden = true;
-            acList.style.display = 'none';
-            showToast(`Usuario seleccionado: ${val}`, 'info');
+            const val = items[selectedIndex].getAttribute('data-name') || '';
+            const email = items[selectedIndex].getAttribute('data-email') || '';
+            selectContact(val, email);
           }
         }
       });
       document.addEventListener('click', e => {
         const item = e.target.closest('#acList li');
         if (item) {
-          const val = item.getAttribute('data-name') || item.textContent.replace('👤', '').trim();
-          inputUsuario.value = val;
-          acList.hidden = true;
-          acList.style.display = 'none';
-          showToast(`Usuario seleccionado: ${val}`, 'info');
+          const val = item.getAttribute('data-name') || '';
+          const email = item.getAttribute('data-email') || '';
+          selectContact(val, email);
         } else if (!e.target.closest('.ac-wrapper')) {
           acList.hidden = true;
           acList.style.display = 'none';
@@ -1887,12 +1848,12 @@
     async function fetchContacts(){
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 3500);
+        const timeoutId = setTimeout(() => controller.abort(), 8000);
         const res = await fetch(`${WEB_APP_URL}?action=contacts`, { signal: controller.signal });
         clearTimeout(timeoutId);
         const data = await res.json();
         if (data && data.ok && Array.isArray(data.contacts) && data.contacts.length) {
-          USUARIOS = Array.from(new Set([...USUARIOS, ...data.contacts]));
+          updateContactsDirectory(data.contacts);
         }
       } catch(e){}
     }
@@ -2516,41 +2477,76 @@
 
     /* ==================== LLAMADOS HTTP (RÁPIDOS Y COMPLETOS) ==================== */
     async function fetchRemote(){
-      syncBadge.innerHTML = '🟡 Sincronizando…';
-      syncBadge.style.background = '#fef3c7';
-      syncBadge.style.color = '#b45309';
+      if (!ticketsRemote) {
+        syncBadge.innerHTML = '🟡 Sincronizando…';
+        syncBadge.style.background = '#fef3c7';
+        syncBadge.style.color = '#b45309';
+      }
 
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 12000);
+        const timeoutId = setTimeout(() => controller.abort(), 25000);
 
         const res = await fetch(`${WEB_APP_URL}?action=list&limit=5000`, { signal: controller.signal });
         clearTimeout(timeoutId);
 
         const data = await res.json();
-        if (data && data.ok && Array.isArray(data.items)){
-          ticketsRemote = data.items;
+        const ticketsList = (data && data.ok) ? (data.tickets || data.items || []) : [];
+        
+        if (data && data.ok && Array.isArray(ticketsList) && ticketsList.length > 0){
+          ticketsRemote = ticketsList;
+          saveRemoteCache(ticketsRemote);
+          
+          if (Array.isArray(data.contacts) && data.contacts.length) {
+            updateContactsDirectory(data.contacts);
+          }
+
           populateMonthsOptions(ticketsRemote);
           render(data.counters);
           syncBadge.innerHTML = '🟢 Google Sheets';
           syncBadge.style.background = '#ecfdf5';
           syncBadge.style.color = '#059669';
-        } else {
-          ticketsRemote = null;
+        } else if (!ticketsRemote) {
           populateMonthsOptions(ticketsLocal);
           render();
           syncBadge.innerHTML = '🟡 Local';
           syncBadge.style.background = '#fef3c7';
           syncBadge.style.color = '#b45309';
         }
-      } catch {
-        ticketsRemote = null;
-        populateMonthsOptions(ticketsLocal);
-        render();
-        syncBadge.innerHTML = '🟡 Local';
-        syncBadge.style.background = '#fef3c7';
-        syncBadge.style.color = '#b45309';
+      } catch (err) {
+        if (!ticketsRemote) {
+          populateMonthsOptions(ticketsLocal);
+          render();
+          syncBadge.innerHTML = '🟡 Local';
+          syncBadge.style.background = '#fef3c7';
+          syncBadge.style.color = '#b45309';
+        } else {
+          syncBadge.innerHTML = '🟢 Google Sheets';
+          syncBadge.style.background = '#ecfdf5';
+          syncBadge.style.color = '#059669';
+          render();
+        }
       }
+    }
+
+    if (syncBadge) {
+      syncBadge.style.cursor = 'pointer';
+      syncBadge.title = 'Clic para sincronizar o configurar URL de Apps Script';
+      syncBadge.addEventListener('click', () => {
+        const currentUrl = localStorage.getItem('gas_web_app_url') || WEB_APP_URL;
+        const newUrl = prompt('Configuración de conexión Google Apps Script:\nIngresa la URL de la aplicación web o presiona Aceptar para forzar sincronización:', currentUrl);
+        if (newUrl && newUrl.trim().startsWith('http')) {
+          localStorage.setItem('gas_web_app_url', newUrl.trim());
+          WEB_APP_URL = newUrl.trim();
+          showToast('URL actualizada. Conectando con Google Sheets...', 'info');
+          fetchRemote();
+          fetchContacts();
+        } else if (newUrl !== null) {
+          showToast('Sincronizando con Google Sheets...', 'info');
+          fetchRemote();
+          fetchContacts();
+        }
+      });
     }
 
     async function postJSON(payload){
