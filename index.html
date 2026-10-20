@@ -1460,7 +1460,7 @@
     'use strict';
 
     /* ==================== CONFIGURACIÓN & ANALISTAS AUTORIZADOS ==================== */
-    const DEFAULT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyleEgTmN1rMnNW2-1eBOYC48ed9Fa3G9ZuhvIzQQHoeEbL9iOLW_dkoP2TeEsz3YdYeA/exec';
+    const DEFAULT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzoB1kGnRF_XyVZnMyVlUAW507-U94LBZN_bboDOfZYp2p98a1KkeSePvhrTjslYIwhZw/exec';
     let WEB_APP_URL = localStorage.getItem('gas_web_app_url') || DEFAULT_WEB_APP_URL;
     const DIRECTORY_SPREADSHEET_ID = '1JCORZBlWL0DPs9DuZQsvd1VFuMy1ZVBT8RgM1S_eNZ0';
     const AUTO_REFRESH_MS = 30000;
@@ -1525,11 +1525,13 @@
       { name:'Pablo Calle', role:'Analista TI', email:'pablocalle@ingetec.com.co', id:'71.456.789', empresa:'Ingetec' }
     ];
 
-    let CONTACTS_LIST = loadCachedContacts() || DEFAULT_CONTACTS;
+    let cachedContacts = loadCachedContacts();
+    let CONTACTS_LIST = (Array.isArray(cachedContacts) && cachedContacts.length > 0) ? cachedContacts : DEFAULT_CONTACTS;
 
     function updateContactsDirectory(freshList) {
       if (!Array.isArray(freshList) || !freshList.length) return;
       const map = new Map();
+      DEFAULT_CONTACTS.forEach(c => map.set((c.name || '').toLowerCase().trim(), c));
       CONTACTS_LIST.forEach(c => map.set((c.name || '').toLowerCase().trim(), c));
       freshList.forEach(item => {
         if (typeof item === 'string') {
@@ -1749,8 +1751,9 @@
       if (!n || n.length < 1) return [];
       
       const terms = n.split(/\s+/).filter(Boolean);
-      return CONTACTS_LIST.filter(c => {
-        const fullSearchString = norm(`${c.name || ''} ${c.email || ''} ${c.role || ''} ${c.id || ''}`);
+      const list = (Array.isArray(CONTACTS_LIST) && CONTACTS_LIST.length > 0) ? CONTACTS_LIST : DEFAULT_CONTACTS;
+      return list.filter(c => {
+        const fullSearchString = norm(`${c.name || ''} ${c.email || ''} ${c.role || ''} ${c.id || ''} ${c.empresa || ''}`);
         return terms.every(term => fullSearchString.includes(term));
       }).slice(0, 25);
     }
@@ -2060,27 +2063,40 @@
       kpiRq.textContent = c.con_req || 0;
     }
 
-    function currentBaseRows(){
-      const base = Array.isArray(ticketsRemote) ? ticketsRemote : ticketsLocal;
+    function getAllTicketsMerged(){
+      if (!Array.isArray(ticketsRemote)) return Array.isArray(ticketsLocal) ? ticketsLocal.slice() : [];
+      if (!Array.isArray(ticketsLocal) || !ticketsLocal.length) return ticketsRemote.slice();
+      const remoteIds = new Set(ticketsRemote.map(t => String(t.id || '').trim()));
+      const pendingLocal = ticketsLocal.filter(t => t && t.id && !remoteIds.has(String(t.id).trim()));
+      return [...pendingLocal, ...ticketsRemote];
+    }
+
+    function currentScopeRows(){
+      const base = getAllTicketsMerged();
       lastSource = Array.isArray(ticketsRemote) ? 'Google Sheets' : 'Local';
       let rows = base.slice();
 
-      const st = statusSelect.value;
-      if (st === 'pendientes') {
-        rows = rows.filter(x => !['Cerrado', 'Cancelado'].includes(String(x.estado)));
-      } else if (st) {
-        rows = rows.filter(x => String(x.estado) === st);
-      }
-
       if (viewSelect.value === 'mis' && currentAnalystUser) {
-        rows = rows.filter(x => String(x.analista).trim() === currentAnalystUser.nombre.trim());
+        rows = rows.filter(x => norm(x.analista) === norm(currentAnalystUser.nombre));
       } else if (analystSelect.value) {
-        rows = rows.filter(x => String(x.analista).trim() === analystSelect.value.trim());
+        rows = rows.filter(x => norm(x.analista) === norm(analystSelect.value));
       }
 
       const activeYm = (monthSelect && monthSelect.value) || (monthPickerInput && monthPickerInput.value);
       if (activeYm) {
         rows = rows.filter(x => extractYm(x.fecha) === activeYm);
+      }
+      return rows;
+    }
+
+    function currentBaseRows(){
+      let rows = currentScopeRows();
+
+      const st = statusSelect.value;
+      if (st === 'pendientes') {
+        rows = rows.filter(x => !['cerrado', 'cancelado'].includes(String(x.estado || '').toLowerCase().trim()));
+      } else if (st) {
+        rows = rows.filter(x => String(x.estado || '').toLowerCase().trim() === st.toLowerCase().trim());
       }
       return rows;
     }
@@ -2097,9 +2113,12 @@
 
       if (searchText && searchText.trim()){
         const n = norm(searchText);
-        rows = rows.filter(r =>
-          norm(`${r.id} ${r.categoria} ${r.falla} ${r.usuario} ${r.descripcion || ''} ${r.requerimiento || ''}`).includes(n)
-        );
+        const matchFn = r => norm(`${r.id} ${r.analista || ''} ${r.categoria} ${r.falla} ${r.usuario} ${r.descripcion || ''} ${r.requerimiento || ''}`).includes(n);
+        rows = rows.filter(matchFn);
+        // Si no aparece con los filtros activos (ej. otro analista, estado o mes), buscar en toda la base de datos
+        if (rows.length === 0) {
+          rows = getAllTicketsMerged().filter(matchFn);
+        }
       }
       rows.sort((a, b) => {
         const da = parseTicketDate(a.fecha) || new Date(0);
@@ -2112,11 +2131,7 @@
     /* ==================== RENDER DE TABLA COMPACTA ==================== */
     function render(countersFromAPI){
       const allRows = currentFilteredRows();
-      if (countersFromAPI && lastSource === 'Google Sheets' && !monthSelect.value && !currentFilterKpi && !statusSelect.value && !analystSelect.value && viewSelect.value !== 'mis') {
-        setCounters(countersFromAPI);
-      } else {
-        setCounters(computeCounters(currentBaseRows()));
-      }
+      setCounters(computeCounters(currentScopeRows()));
 
       syncBadge.innerHTML = lastSource === 'Google Sheets' ? '🟢 Google Sheets' : '🟡 Local';
       syncBadge.style.background = lastSource === 'Google Sheets' ? '#ecfdf5' : '#fef3c7';
@@ -2286,8 +2301,8 @@
       const btnD = e.target.closest('.btn-detail') || e.target.closest('.desc-preview');
       if (btnD) {
         const id = btnD.dataset.id;
-        const all = Array.isArray(ticketsRemote) ? ticketsRemote : ticketsLocal;
-        const t = all.find(x => x.id === id);
+        const all = getAllTicketsMerged();
+        const t = all.find(x => String(x.id).trim() === String(id).trim());
         if (t) showTicketDetails(t);
       }
     });
@@ -2345,7 +2360,7 @@
     }
 
     function updateMonthlyReport() {
-      const allTickets = Array.isArray(ticketsRemote) ? ticketsRemote : ticketsLocal;
+      const allTickets = getAllTicketsMerged();
       let selYm = reportMonthSelect ? reportMonthSelect.value : '';
       if (!selYm && reportMonthPicker && reportMonthPicker.value) {
         selYm = reportMonthPicker.value;
@@ -2355,7 +2370,7 @@
       let filtered = allTickets.filter(t => {
         const ym = extractYm(t.fecha);
         if (selYm && ym !== selYm) return false;
-        if (selAnalyst && String(t.analista).trim() !== selAnalyst.trim()) return false;
+        if (selAnalyst && norm(t.analista) !== norm(selAnalyst)) return false;
         return true;
       });
 
@@ -2476,6 +2491,26 @@
     }
 
     /* ==================== LLAMADOS HTTP (RÁPIDOS Y COMPLETOS) ==================== */
+    function normalizeTicketObj(raw) {
+      if (!raw || typeof raw !== 'object') return raw;
+      return {
+        ...raw,
+        id: String(raw.id || '').trim(),
+        analista: raw.analista ?? raw.analyst ?? '',
+        correoAnalista: raw.correoAnalista ?? raw.analystEmail ?? '',
+        categoria: raw.categoria ?? raw.project ?? 'Soporte General',
+        falla: raw.falla ?? raw.supportType ?? raw.servicio ?? '',
+        usuario: raw.usuario ?? raw.reporterUser ?? '',
+        prioridad: raw.prioridad ?? raw.priority ?? 'Media',
+        descripcion: raw.descripcion ?? raw.description ?? '',
+        estado: raw.estado ?? raw.status ?? 'Abierto',
+        solucion: raw.solucion ?? raw.solution ?? '',
+        fecha: raw.fecha ?? raw.createdAt ?? raw.fechaCreacion ?? '',
+        motivo: raw.motivo ?? raw.reason ?? '',
+        requerimiento: raw.requerimiento ?? raw.requirementNumber ?? ''
+      };
+    }
+
     async function fetchRemote(){
       if (!ticketsRemote) {
         syncBadge.innerHTML = '🟡 Sincronizando…';
@@ -2487,13 +2522,22 @@
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 25000);
 
-        const res = await fetch(`${WEB_APP_URL}?action=list&limit=5000`, { signal: controller.signal });
+        const res = await fetch(`${WEB_APP_URL}?action=list&limit=10000&_t=${Date.now()}`, {
+          cache: 'no-store',
+          signal: controller.signal
+        });
         clearTimeout(timeoutId);
 
         const data = await res.json();
-        const ticketsList = (data && data.ok) ? (data.tickets || data.items || []) : [];
+        const rawList = (data && data.ok) ? (data.tickets || data.items || data.data || []) : [];
+        const ticketsList = Array.isArray(rawList) ? rawList.map(normalizeTicketObj) : [];
         
-        if (data && data.ok && Array.isArray(ticketsList) && ticketsList.length > 0){
+        if (data && data.ok && Array.isArray(rawList)){
+          // Limpiar de ticketsLocal los que ya llegaron desde Google Sheets
+          const remoteIds = new Set(ticketsList.map(x => String(x.id || '').trim()));
+          ticketsLocal = (Array.isArray(ticketsLocal) ? ticketsLocal : []).filter(t => t && t.id && !remoteIds.has(String(t.id).trim()));
+          saveLocal(ticketsLocal);
+
           ticketsRemote = ticketsList;
           saveRemoteCache(ticketsRemote);
           
@@ -2501,31 +2545,24 @@
             updateContactsDirectory(data.contacts);
           }
 
-          populateMonthsOptions(ticketsRemote);
+          populateMonthsOptions(getAllTicketsMerged());
           render(data.counters);
-          syncBadge.innerHTML = '🟢 Google Sheets';
+          syncBadge.innerHTML = `🟢 Google Sheets (${ticketsRemote.length})`;
           syncBadge.style.background = '#ecfdf5';
           syncBadge.style.color = '#059669';
-        } else if (!ticketsRemote) {
-          populateMonthsOptions(ticketsLocal);
+        } else {
+          populateMonthsOptions(getAllTicketsMerged());
           render();
           syncBadge.innerHTML = '🟡 Local';
           syncBadge.style.background = '#fef3c7';
           syncBadge.style.color = '#b45309';
         }
       } catch (err) {
-        if (!ticketsRemote) {
-          populateMonthsOptions(ticketsLocal);
-          render();
-          syncBadge.innerHTML = '🟡 Local';
-          syncBadge.style.background = '#fef3c7';
-          syncBadge.style.color = '#b45309';
-        } else {
-          syncBadge.innerHTML = '🟢 Google Sheets';
-          syncBadge.style.background = '#ecfdf5';
-          syncBadge.style.color = '#059669';
-          render();
-        }
+        populateMonthsOptions(getAllTicketsMerged());
+        render();
+        syncBadge.innerHTML = ticketsRemote ? '🟠 Caché (Clic para reconectar)' : '🟡 Local';
+        syncBadge.style.background = '#fef3c7';
+        syncBadge.style.color = '#b45309';
       }
     }
 
@@ -2595,15 +2632,22 @@
         estado: 'Abierto', fecha: nowISO
       };
 
-      ticketsLocal.unshift(t);
+      // Insertar inmediatamente en memoria local y remota para actualizar KPIs y tabla al instante
+      ticketsLocal = [t, ...(Array.isArray(ticketsLocal) ? ticketsLocal : []).filter(x => x.id !== id)];
       saveLocal(ticketsLocal);
+      if (Array.isArray(ticketsRemote)) {
+        ticketsRemote = [t, ...ticketsRemote.filter(x => x.id !== id)];
+        saveRemoteCache(ticketsRemote);
+      }
+      populateMonthsOptions(getAllTicketsMerged());
+      currentPage = 1;
       render();
-      showToast(`Ticket ${id} creado localmente`, 'info');
+      showToast(`Ticket ${id} registrado`, 'info');
 
       try {
         const d = await postJSON({
           action: 'create', id: t.id, analista, correoAnalista, categoria, falla, usuario, prioridad,
-          descripcion, estado: t.estado, fechaISO: nowISO, requerimiento: t.requerimiento
+          descripcion, estado: t.estado, fecha: nowISO, fechaISO: nowISO, requerimiento: t.requerimiento
         });
         if (d && d.ok){
           showToast(`¡Ticket ${id} sincronizado con Sheets!`, 'success');
@@ -2616,6 +2660,8 @@
         btnSubmit.innerHTML = `<svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg><span>Guardar Reporte</span>`;
         form.reset();
         toggleReq();
+        const hint = $('#userSelectedEmail');
+        if (hint) hint.textContent = 'Elige entre las sugerencias';
         if (currentAnalystUser) $('#analista').value = currentAnalystUser.nombre;
       }
     });
@@ -2659,6 +2705,16 @@
       if (s) s.dataset.prev = s.value;
     });
 
+    function updateTicketInMemory(id, fields) {
+      const cleanId = String(id || '').trim();
+      const tL = (Array.isArray(ticketsLocal) ? ticketsLocal : []).find(x => String(x.id).trim() === cleanId);
+      if (tL) { Object.assign(tL, fields); saveLocal(ticketsLocal); }
+      if (Array.isArray(ticketsRemote)) {
+        const tR = ticketsRemote.find(x => String(x.id).trim() === cleanId);
+        if (tR) { Object.assign(tR, fields); saveRemoteCache(ticketsRemote); }
+      }
+    }
+
     /* ==================== CAMBIOS DE ESTADO ==================== */
     document.addEventListener('change', async e => {
       const selE = e.target.closest('.estado-select');
@@ -2670,8 +2726,7 @@
         if (newStatus === 'Cancelado'){
           const r = await askModal({ title: `Cancelar ticket ${id}`, label: 'Motivo de la cancelación', required: true });
           if (!r.ok){ selE.value = prev; return; }
-          const tL = ticketsLocal.find(x => x.id === id);
-          if (tL){ tL.estado = newStatus; tL.motivo = r.text; saveLocal(ticketsLocal); }
+          updateTicketInMemory(id, { estado: newStatus, motivo: r.text });
           render();
           const d = await postJSON({ action: 'update_status', id, status: newStatus, reason: r.text });
           if (d && d.ok) { showToast(`Ticket ${id} cancelado`, 'success'); fetchRemote(); }
@@ -2681,16 +2736,14 @@
         if (newStatus === 'Cerrado'){
           const r = await askModal({ title: `Cerrar ticket ${id}`, label: 'Solución técnica brindada', required: true });
           if (!r.ok){ selE.value = prev; return; }
-          const tL = ticketsLocal.find(x => x.id === id);
-          if (tL){ tL.estado = newStatus; tL.solucion = r.text; saveLocal(ticketsLocal); }
+          updateTicketInMemory(id, { estado: newStatus, solucion: r.text });
           render();
           const d = await postJSON({ action: 'update_status', id, status: newStatus, solution: r.text });
           if (d && d.ok) { showToast(`Ticket ${id} cerrado`, 'success'); fetchRemote(); }
           return;
         }
 
-        const tL = ticketsLocal.find(x => x.id === id);
-        if (tL){ tL.estado = newStatus; saveLocal(ticketsLocal); }
+        updateTicketInMemory(id, { estado: newStatus });
         render();
         const d2 = await postJSON({ action: 'update_status', id, status: newStatus });
         if (d2 && d2.ok) fetchRemote();
@@ -2700,7 +2753,7 @@
     /* ==================== INICIALIZACIÓN ==================== */
     function init(){
       checkAuthSession();
-      populateMonthsOptions(ticketsLocal);
+      populateMonthsOptions(getAllTicketsMerged());
       render();
       fetchRemote();
       fetchContacts();
