@@ -1460,7 +1460,12 @@
     'use strict';
 
     /* ==================== CONFIGURACIÓN & ANALISTAS AUTORIZADOS ==================== */
-    const DEFAULT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzSmEoP-lKUg9FO0lxC7ZhcELHCKz5LkQZAijMJOa9swshiLIuGP2R-qnocDZzKa767AA/exec';
+    const DEFAULT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwurCrQ6GalCbL4NRevLxM3iSowgjZMUOqcojDDZ4bEMhNxDqhfMWWQBhrRXN7n3uLCfg/exec';
+    // Si cambia DEFAULT_WEB_APP_URL en el código, actualizar automáticamente la URL activa
+    if (localStorage.getItem('gas_default_url_ref') !== DEFAULT_WEB_APP_URL) {
+      localStorage.setItem('gas_default_url_ref', DEFAULT_WEB_APP_URL);
+      localStorage.setItem('gas_web_app_url', DEFAULT_WEB_APP_URL);
+    }
     let WEB_APP_URL = localStorage.getItem('gas_web_app_url') || DEFAULT_WEB_APP_URL;
     const DIRECTORY_SPREADSHEET_ID = '1JCORZBlWL0DPs9DuZQsvd1VFuMy1ZVBT8RgM1S_eNZ0';
     const AUTO_REFRESH_MS = 30000;
@@ -1583,16 +1588,27 @@
       return !isNaN(dFallback.getTime()) ? dFallback : null;
     }
 
-    function extractYm(val) {
-      const d = parseTicketDate(val);
-      if (d) {
-        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    function extractYm(val, ticketObj) {
+      const tryStr = raw => {
+        if (!raw) return '';
+        const d = parseTicketDate(raw);
+        if (d) return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+        const s = String(raw || '');
+        const m = s.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
+        if (m) return `${m[3]}-${String(m[2]).padStart(2, '0')}`;
+        const m2 = s.match(/(\d{4})[\-\/](\d{1,2})/);
+        if (m2) return `${m2[1]}-${String(m2[2]).padStart(2, '0')}`;
+        return '';
+      };
+      let res = tryStr(val);
+      if (res) return res;
+      if (ticketObj && typeof ticketObj === 'object') {
+        res = tryStr(ticketObj.fechaCreacion);
+        if (res) return res;
+        const idStr = String(ticketObj.id || '').trim();
+        const mId = idStr.match(/^T(\d{4})(\d{2})/);
+        if (mId) return `${mId[1]}-${mId[2]}`;
       }
-      const s = String(val || '');
-      const m = s.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
-      if (m) return `${m[3]}-${String(m[2]).padStart(2, '0')}`;
-      const m2 = s.match(/(\d{4})[\-\/](\d{1,2})/);
-      if (m2) return `${m2[1]}-${String(m2[2]).padStart(2, '0')}`;
       return '';
     }
 
@@ -1890,7 +1906,7 @@
       const all = Array.isArray(tickets) ? tickets : [];
       
       all.forEach(t => {
-        const ym = extractYm(t.fecha);
+        const ym = extractYm(t.fecha, t);
         if (ym && ym.length === 7) {
           ymCounts[ym] = (ymCounts[ym] || 0) + 1;
         }
@@ -2084,7 +2100,7 @@
 
       const activeYm = (monthSelect && monthSelect.value) || (monthPickerInput && monthPickerInput.value);
       if (activeYm) {
-        rows = rows.filter(x => extractYm(x.fecha) === activeYm);
+        rows = rows.filter(x => extractYm(x.fecha, x) === activeYm);
       }
       return rows;
     }
@@ -2346,13 +2362,16 @@
     /* ==================== INFORME MENSUAL Y GRÁFICAS ==================== */
     if (btnOpenMonthlyReport) {
       btnOpenMonthlyReport.addEventListener('click', () => {
+        populateMonthsOptions(getAllTicketsMerged());
         const activeYm = (monthSelect && monthSelect.value) || (monthPickerInput && monthPickerInput.value);
         if (activeYm) {
           if (reportMonthSelect) reportMonthSelect.value = activeYm;
           if (reportMonthPicker) reportMonthPicker.value = activeYm;
-        } else {
-          if (reportMonthSelect) reportMonthSelect.value = '';
-          if (reportMonthPicker) reportMonthPicker.value = '';
+        } else if (reportMonthSelect && !reportMonthSelect.value && reportMonthSelect.options.length > 1) {
+          // Seleccionar por defecto el mes más reciente (ej. Octubre de 2026)
+          const latestYm = reportMonthSelect.options[1].value;
+          reportMonthSelect.value = latestYm;
+          if (reportMonthPicker) reportMonthPicker.value = latestYm;
         }
         updateMonthlyReport();
         reportModal.showModal();
@@ -2368,7 +2387,7 @@
       const selAnalyst = reportAnalystSelect ? reportAnalystSelect.value : '';
 
       let filtered = allTickets.filter(t => {
-        const ym = extractYm(t.fecha);
+        const ym = extractYm(t.fecha, t);
         if (selYm && ym !== selYm) return false;
         if (selAnalyst && norm(t.analista) !== norm(selAnalyst)) return false;
         return true;
@@ -2574,6 +2593,7 @@
         const newUrl = prompt('Configuración de conexión Google Apps Script:\nIngresa la URL de la aplicación web o presiona Aceptar para forzar sincronización:', currentUrl);
         if (newUrl && newUrl.trim().startsWith('http')) {
           localStorage.setItem('gas_web_app_url', newUrl.trim());
+          localStorage.setItem('gas_default_url_ref', DEFAULT_WEB_APP_URL);
           WEB_APP_URL = newUrl.trim();
           showToast('URL actualizada. Conectando con Google Sheets...', 'info');
           fetchRemote();
@@ -2752,10 +2772,10 @@
 
     /* ==================== INICIALIZACIÓN ==================== */
     function init(){
-      checkAuthSession();
       populateMonthsOptions(getAllTicketsMerged());
       render();
-      fetchRemote();
+      checkAuthSession();
+      if (!currentAnalystUser) fetchRemote();
       fetchContacts();
       setInterval(() => { if (!document.hidden && currentAnalystUser) fetchRemote(); }, AUTO_REFRESH_MS);
     }
